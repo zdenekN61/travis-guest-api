@@ -26,6 +26,23 @@ module Travis::GuestAPI
       job_record[step_uuid]
     end
 
+    def set_multiple(job_id, steps)
+      fail ArgumentError, 'Parameter "steps" must be an array' unless steps.is_a?(Array)
+
+      @mutex.synchronize do
+        job_record = get_job(job_id) || {}
+
+        steps.each do |step|
+          step_uuid = step['uuid']
+
+          job_record[step_uuid] ||= {}
+          job_record[step_uuid].deep_merge!(step)
+        end
+
+        set_job(job_id, job_record)
+      end
+    end
+
     def get(job_id, step_uuid)
       job_record = get_job(job_id)
       return nil unless job_record

@@ -40,10 +40,10 @@ class Travis::GuestApi::App::Endpoint
       end
 
       @reporter.send_tresult(@job_id, steps)
-      steps.each do |step|
-        Travis.logger.debug "Setting step #{@job_id.inspect}, #{step['uuid'].inspect} to #{step.inspect}"
-        Travis::GuestApi.cache.set(@job_id, step['uuid'], step)
-      end
+
+      Travis::GuestApi.cache.set_multiple(@job_id, steps)
+      Travis.logger.debug "Job id: #{@job_id} setting steps: #{steps.inspect}"
+
       steps = steps.first if !(Array === env['rack.parser.result'])
       steps.to_json
     end
