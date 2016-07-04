@@ -16,9 +16,9 @@ module Travis::GuestApi
     let(:callback) { ->(x) { } }
 
     describe 'GET /uptime' do
-      it 'returns 204' do
+      it 'returns 200' do
         response = get '/api/v2/uptime'
-        expect(response.status).to eq(204)
+        expect(response.status).to eq(200)
       end
     end
 

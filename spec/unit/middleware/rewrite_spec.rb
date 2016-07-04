@@ -20,7 +20,7 @@ describe Travis::GuestApi::App::Middleware::Rewrite do
       job_id_URL_param = 42
       get "/api/v1/jobs/#{job_id_URL_param}/uptime"
       expect(last_request.env['job_id']).to eq(job_id_URL_param)
-      expect(last_response.status).to eq 204
+      expect(last_response.status).to eq 200
     end
   end
 
