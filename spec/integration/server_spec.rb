@@ -15,7 +15,7 @@ module Travis::GuestApi
       sleep 0.5
       response = Faraday.get "http://localhost:#{s.port}/api/v2/uptime"
       s.stop
-      expect(response.status).to eq(204)
+      expect(response.status).to eq(200)
     end
 
     it "should start and stop servers" do
