@@ -53,6 +53,7 @@ def handle_payload(payload)
     Travis.logger.info "Finished job_id=#{job_id} with result=#{result}"
   when 'errored'
     payload[:reporter].notify_job_finished(job_id, 'errored')
+    Travis::GuestApi.cache.delete(job_id)
     Travis.logger.info "Errored job_id=#{job_id}"
   else
     raise "Unknown event(#{event.inspect})"
