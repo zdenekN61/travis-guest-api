@@ -1,43 +1,28 @@
 [![Build Status](https://travis-ci.org/AVGTechnologies/travis-guest-api.svg?branch=master)](https://travis-ci.org/AVGTechnologies/travis-guest-api) [![Code Climate](https://codeclimate.com/github/AVGTechnologies/travis-guest-api/badges/gpa.svg)](https://codeclimate.com/github/AVGTechnologies/travis-guest-api) [![Test Coverage](https://codeclimate.com/github/AVGTechnologies/travis-guest-api/badges/coverage.svg)](https://codeclimate.com/github/AVGTechnologies/travis-guest-api/coverage)
 
-Guest API
-=========
+# Guest API
 
-Provides communitacion from Guest VM to travis (to worker and database)
+Service representing a bridge between Final-CI and test machines, by
+processing the requests from VMs and taking the neccessary actions.
 
-*This is Proof of concept ...and work in progress*
+Covered functionality:
+* test state notifications
+* test step reporting
+* log management
 
-Basics of Architecutre
-----------------------
+## Development
 
-[Travis-worker](https://github.com/finalci/travis-worker) do the
-following:
+* checkout the repository
+* create travis.yml based on example in config directory
+* run `bundle install`
+* run `rspec` to verify unit tests are passing
 
-1. starts VM
-2. starts GuestAPI server
-3. Forward the local port of the GuestAPI to the VM
-4. set enviroment variable GUEST_API_URL in the VM and run the test.
-5. ...and test can use Guest API.
+## Contributing
 
-Some command of GuestAPI call the callback back in travis-worker.
+Bug reports and pull requests are welcome on GitHub at
+https://github.com/AVGTechnologies/travis-guest-api.
 
+## License
 
-
-API endpoints
--------------
-Work in progress...
-
-  * POST /logs
-  * POST steps
-  * GET  steps/:testcase_uuid
-  * PUT  steps/:testcase_uuid
-  * POST steps/upload
-  * PUT ssh     #keep_disconnected, #retry_on_disconnect
-  * POST restart
-  * POST finished
-
-
-
-     curl -X POST -H "Accept: application/json" -d '{"job_id": 666, "log_message": "any text", "number": 1}' http://localhost:9292/jobs/1/logs
-     curl -X POST -H "Accept: application/json" -d '{"job_id": 1, "message": "any text"}' http://localhost:8102/jobs/1/finished
-     curl -X POST -H "Accept: application/json" -d '{"job_id": 2, "name": "testName", "classname": "className", "result": "success"}' http://localhost:8102/jobs/1/steps
+The service is available as open source under the terms of the [MIT
+License](http://opensource.org/licenses/MIT).
