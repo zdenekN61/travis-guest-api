@@ -5,6 +5,15 @@ class Travis::GuestApi::App::Endpoint
     before do
       @job_id = env['job_id']
       @reporter = env['reporter']
+      @new_step_result_map =
+      [
+        'failed',
+        'pending',
+        'blocked',
+        'created',
+        'passed',
+        'failed'
+      ]
     end
 
     post '/steps' do
@@ -146,8 +155,11 @@ class Travis::GuestApi::App::Endpoint
           step['data']['status'] = old_step_rewrite_map[result][:status]
         end
         step['result']  = old_step_rewrite_map[result][:rewrite_result]
+      elsif !@new_step_result_map.include?(result)
+        halt 422, {
+          error: "Unknown step result: #{step.inspect}, step could not be updated"
+        }.to_json
       end
-
       step
     end
   end
