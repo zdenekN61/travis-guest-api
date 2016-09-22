@@ -138,6 +138,15 @@ class Travis::GuestApi::App::Endpoint
       }
     end
 
+    def new_step_result_map(result)
+      isNewStepResult = false
+      @new_step_result = ['failed', 'pending', 'blocked', 'created', 'passed']
+      if @new_step_result.include?(result)
+        isNewStepResult = true
+      end
+      isNewStepResult
+    end
+
     def rewrite_legacy_step_result(step)
       result = step['result']
       if old_step_rewrite_map.keys.include?(result)
@@ -146,8 +155,11 @@ class Travis::GuestApi::App::Endpoint
           step['data']['status'] = old_step_rewrite_map[result][:status]
         end
         step['result']  = old_step_rewrite_map[result][:rewrite_result]
+      elsif !new_step_result_map(result)
+        halt 422, {
+          error: "Unknown result: #{step['result'].inspect} for step: #{step['uuid'].inspect}, step could not be updated."
+        }.to_json
       end
-
       step
     end
   end

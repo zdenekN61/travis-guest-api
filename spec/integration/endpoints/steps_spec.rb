@@ -37,7 +37,7 @@ module Travis::GuestApi
         {
           'name'      => 'stepName2',
           'classname' => 'caseName2',
-          'result'    => 'success',
+          'result'    => 'passed',
           'test_data' => { 'any_content' => 'xxx' },
           'position'  => 10,
           'class_position' => 11,
@@ -207,7 +207,7 @@ module Travis::GuestApi
       describe 'PUT /steps/:uuid?' do
         it 'modifies existing step' do
           step_uuid = create_step(testcase)
-          update_request = { result: 'updated result' }
+          update_request = { result: 'failed' }
           expect(reporter).to receive(:send_tresult_update)
           put "/api/v2/steps/#{step_uuid}",
               update_request.to_json,
@@ -220,6 +220,19 @@ module Travis::GuestApi
           expected_testcase['number'] = 1
           expect(last_response.status).to eq 200
           expect(JSON.parse last_response.body).to eq expected_testcase
+        end
+
+        it 'modifies existing step with unknown result' do
+          step_uuid = create_step(testcase)
+          update_request = { result: 'updated result' }
+          put "/api/v2/steps/#{step_uuid}",
+              update_request.to_json,
+              'CONTENT_TYPE' => 'application/json'
+          response_error = "Unknown result: \"updated result\" for step: \"#{step_uuid}\","\
+                           " step could not be updated."
+          expect(last_response.status).to eq 422
+          parsed_response = JSON.parse last_response.body
+          expect(parsed_response['error']).to eq response_error
         end
 
         it 'returns 403 when updating name' do
@@ -268,7 +281,7 @@ module Travis::GuestApi
             step_uuid1 = create_step(testcase1)
             step_uuid2 = create_step(testcase2)
             update_request = [
-              { 'uuid' => step_uuid1, 'result' => 'success' },
+              { 'uuid' => step_uuid1, 'result' => 'passed' },
               { 'uuid' => step_uuid2, 'result' => 'failed' }
             ]
 
@@ -276,7 +289,7 @@ module Travis::GuestApi
               expect(arg.count).to eq 2
 
               expect(arg[0]['uuid']).to eq step_uuid1
-              expect(arg[0]['result']).to eq 'success'
+              expect(arg[0]['result']).to eq 'passed'
               expect(arg[0]['number']).to eq 1
 
               expect(arg[1]['uuid']).to eq step_uuid2
@@ -295,6 +308,21 @@ module Travis::GuestApi
               testcase2.update(update_request[1]).update(
                 'job_id' => 1, 'number' => 1)
             ]
+          end
+
+          it 'updates several steps with invalid result' do
+            step_uuid1 = create_step(testcase1)
+            step_uuid2 = create_step(testcase2)
+            update_request = [
+              { 'uuid' => step_uuid1, 'result' => 'passed' },
+              { 'uuid' => step_uuid2, 'result' => 'success' }
+            ]
+
+            put "/api/v2/steps",
+                update_request.to_json,
+                'CONTENT_TYPE' => 'application/json'
+
+            expect(last_response.status).to eq 422
           end
         end
 
@@ -386,11 +414,6 @@ module Travis::GuestApi
           it 'rewrites Skipped -> pending with data.status="skipped"' do
             send_request(result: 'Skipped')
             expect(JSON.parse last_response.body).to eq create_expect_result 'Skipped'
-          end
-
-          it 'ignores unknown result' do
-            send_request(result: 'Unknown')
-            expect(JSON.parse last_response.body).to eq create_expect_result 'Unknown'
           end
         end
       end
